@@ -70,7 +70,30 @@
         {"name":"max_supply", "type":"asset"},
         {"name":"issuer", "type":"account_name"}
       ]
+    },{
+      "name": "setunlock",
+      "base": "",
+      "fields": [{
+          "name": "date",
+          "type": "uint64"
+        },{
+          "name": "percent",
+          "type": "uint8"
+        }
+      ]
+    },{
+      "name": "launchlock",
+      "base": "",
+      "fields": [{
+          "name": "to",
+          "type": "name"
+        },{
+          "name": "quantity",
+          "type": "asset"
+        }
+      ]
     }
+
   ],
   "actions": [{
       "name": "transfer",
@@ -84,8 +107,15 @@
       "name": "create",
       "type": "create",
       "ricardian_contract": ""
+    },,{
+      "name": "setunlock",
+      "type": "setunlock",
+      "ricardian_contract": ""
+    },{
+      "name": "launchlock",
+      "type": "launchlock",
+      "ricardian_contract": ""
     }
-
   ],
   "tables": [{
       "name": "accounts",
@@ -100,7 +130,7 @@
       "key_names" : ["currency"],
       "key_types" : ["uint64"]
     },{
-      "name": "gradunlock",
+      "name": "gradunlocks",
       "index_type": "i64",
       "key_names": [
         "locked_until"
@@ -110,7 +140,7 @@
       ],
       "type": "gradunlock"
     },{
-      "name": "transferlck",
+      "name": "transferlcks",
       "index_type": "i64",
       "key_names": [
         "id"
@@ -120,7 +150,6 @@
       ],
       "type": "transferlck"
     }
-
   ],
   "ricardian_clauses": [],
   "abi_extensions": []

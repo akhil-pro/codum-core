@@ -1,4 +1,5 @@
 #include "codum.token.hpp"
+#include <iostream>
 
 namespace eosio
 {
@@ -79,6 +80,45 @@ void token::transfer(account_name from,
     add_balance(to, quantity, from);
 }
 
+// ==> WIP  how to store datetime?  <== //
+void token::setunlock(uint64_t date, uint8_t percent) // WIP
+{
+    require_auth(_self);
+    gradunlocks gradual_unlock_table(_self, _self); // code: _self, scope: _self
+    auto existing = gradual_unlock_table.find(date);
+    eosio_assert(existing == gradual_unlock_table.end(), "This lock date is already set");
+
+    gradual_unlock_table.emplace(_self, [&](auto &ut) {
+        ut.locked_until = date;
+        ut.lock_threshold = percent;
+    });
+}
+
+// ===> WIP launch_lock function <=== //
+void token::launchlock(account_name to, asset quantity)
+{
+    // ISSUER PERMISSION CHECK //
+    auto sym = quantity.symbol;
+    eosio_assert(sym.is_valid(), "invalid symbol name");
+    auto sym_name = sym.name();
+    stats statstable(_self, sym_name);
+    auto existing = statstable.find(sym_name);
+    eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
+    const auto &st = *existing;
+    require_auth(st.issuer);
+    // ISSUER PERMISSION CHECK COMPLETE//
+
+    // QUANTITY CHECK //
+    eosio_assert(quantity.is_valid(), "invalid quantity");
+    eosio_assert(quantity.amount > 0, "must issue positive quantity");
+    eosio_assert(quantity.symbol == st.supply.symbol, "symbol precision mismatch");
+    eosio_assert(quantity.amount <= st.max_supply.amount - st.supply.amount, "quantity exceeds available supply");
+    // QUANTITY CHECK //
+
+    uint64_t launch_date = 1000; // HARDCODING the launch date.
+    transferlcks transfer_lock_table(_self, _self);
+}
+
 void token::sub_balance(account_name owner, asset value)
 {
     accounts from_acnts(_self, owner);
@@ -118,4 +158,4 @@ void token::add_balance(account_name owner, asset value, account_name ram_payer)
 
 } // namespace eosio
 
-EOSIO_ABI(eosio::token, (create)(issue)(transfer))
+EOSIO_ABI(eosio::token, (create)(issue)(transfer)(setunlock)(launchlock))

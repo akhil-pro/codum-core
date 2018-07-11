@@ -33,8 +33,13 @@ public:
                 asset quantity,
                 string memo);
 
-  inline asset get_supply(symbol_name sym) const;
+  // @abi action
+  void setunlock(uint64_t date, uint8_t percent); // WIP
 
+  // @abi action
+  void launchlock(account_name to, asset quantity); // WIP
+
+  inline asset get_supply(symbol_name sym) const;
   inline asset get_balance(account_name owner, symbol_name sym) const;
 
 private:
@@ -58,42 +63,38 @@ private:
   typedef eosio::multi_index<N(stat), currency_stats> stats;
 
   // ============ WIP ==============
-  // defining codumGradualTransferUnlock
-  // struct codum_gradual_transfer_unlock
 
-  /// @abi table
+  /// @abi table gradunlocks i64
   struct gradunlock
   {
-    uint64_t locked_until; //primary key
+    uint64_t locked_until;
     uint8_t lock_threshold;
 
     uint64_t primary_key() const { return locked_until; }
-    EOSLIB_SERIALIZE( gradunlock, ( locked_until )( lock_threshold ))
+
+    EOSLIB_SERIALIZE(gradunlock, (locked_until)(lock_threshold))
   };
 
-  // defining the codumTransferLock table structure
-  // struct codum_transfer_lock
+  typedef eosio::multi_index<N(gradunlocks), gradunlock> gradunlocks;
 
-    /// @abi table
+  /// @abi table transferlcks i64
   struct transferlck
   {
-    uint64_t id; //primary key and auto increment
-    account_name account; //index by account
+    uint64_t id;
+    account_name account;
     uint64_t locked_balance;
     uint64_t locked_until;
 
     uint64_t primary_key() const { return id; }
+
     account_name get_account() const { return account; }
 
-     EOSLIB_SERIALIZE( transferlck, ( id )( account )( locked_balance )( locked_until) )
+    EOSLIB_SERIALIZE(transferlck, (id)(account)(locked_balance)(locked_until))
   };
 
-  typedef eosio::multi_index< N( transferlcks ), transferlck, 
-  indexed_by< N( byacc ),   const_mem_fun< transferlck, uint64_t, &transferlck::get_account> >
-    > transferlcks();
-
-  typedef eosio::multi_index<N(gradunlocks), gradunlock> gradunlocks;
-  // typedef eosio::multi_index<N(transferlcks), transferlck> transferlcks;
+  typedef eosio::multi_index<N(transferlcks), transferlck,
+                             indexed_by<N(byacc), const_mem_fun<transferlck, uint64_t, &transferlck::get_account>>>
+  transferlcks();
   // ============ WIP ==============
 
   void sub_balance(account_name owner, asset value);
@@ -107,7 +108,7 @@ public:
     asset quantity;
     string memo;
   };
-};
+}; // class token.
 
 asset token::get_supply(symbol_name sym) const
 {
