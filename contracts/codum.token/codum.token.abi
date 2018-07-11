@@ -5,6 +5,34 @@
       "type": "name"
    }],
   "structs": [{
+      "name": "gradunlock",
+      "base": "",
+      "fields": [{
+          "name": "locked_until",
+          "type": "uint64"
+        },{
+          "name": "lock_threshold",
+          "type": "uint8"
+        }
+      ]
+    },{
+      "name": "transferlck",
+      "base": "",
+      "fields": [{
+          "name": "id",
+          "type": "uint64"
+        },{
+          "name": "account",
+          "type": "name"
+        },{
+          "name": "locked_balance",
+          "type": "uint64"
+        },{
+          "name": "locked_until",
+          "type": "uint64"
+        }
+      ]
+    },{
       "name": "transfer",
       "base": "",
       "fields": [
@@ -71,7 +99,28 @@
       "index_type": "i64",
       "key_names" : ["currency"],
       "key_types" : ["uint64"]
+    },{
+      "name": "gradunlock",
+      "index_type": "i64",
+      "key_names": [
+        "locked_until"
+      ],
+      "key_types": [
+        "uint64"
+      ],
+      "type": "gradunlock"
+    },{
+      "name": "transferlck",
+      "index_type": "i64",
+      "key_names": [
+        "id"
+      ],
+      "key_types": [
+        "uint64"
+      ],
+      "type": "transferlck"
     }
+
   ],
   "ricardian_clauses": [],
   "abi_extensions": []
