@@ -39,6 +39,9 @@ public:
   // @abi action
   void launchlock(account_name to, asset quantity); // WIP
 
+  // @abi action
+  void gradlock(account_name to, asset quantity);
+
   inline asset get_supply(symbol_name sym) const;
   inline asset get_balance(account_name owner, symbol_name sym) const;
 
@@ -62,8 +65,6 @@ private:
   typedef eosio::multi_index<N(accounts), account> accounts;
   typedef eosio::multi_index<N(stat), currency_stats> stats;
 
-  // ============ WIP ==============
-
   /// @abi table gradunlocks i64
   struct gradunlock
   {
@@ -77,12 +78,14 @@ private:
 
   typedef eosio::multi_index<N(gradunlocks), gradunlock> gradunlocks;
 
+  // ============ WIP ==============
+
   /// @abi table transferlcks i64
   struct transferlck
   {
     uint64_t id;
     account_name account;
-    uint64_t locked_balance;
+    asset locked_balance;
     uint64_t locked_until;
 
     uint64_t primary_key() const { return id; }
@@ -92,11 +95,10 @@ private:
     EOSLIB_SERIALIZE(transferlck, (id)(account)(locked_balance)(locked_until))
   };
 
-   typedef eosio::multi_index<N(transferlcks), transferlck,
-        indexed_by< N(acc),
-            const_mem_fun<transferlck, uint64_t, &transferlck::get_account>
-        >
-    > transferlcks;
+  typedef eosio::multi_index<N(transferlcks), transferlck,
+                             indexed_by<N(acc),
+                                        const_mem_fun<transferlck, uint64_t, &transferlck::get_account>>>
+      transferlcks;
   // ============ WIP ==============
 
   void sub_balance(account_name owner, asset value);

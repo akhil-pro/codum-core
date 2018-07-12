@@ -117,11 +117,19 @@ void token::launchlock(account_name to, asset quantity)
 
     /*uint64_t launch_date = stactic_cast<uint64_t>(1567987200)//==> epoch time in seconds corressponding to  Monday, 9 September 2019 00:00:00 GMT*/
 
-    uint64_t launch_date = static_cast<uint64_t>(1000); // launch date for testing.
-    transferlcks transfer_lock_table(_self, _self);     // code: _self, scope: _self
+    uint64_t launch_date = 1000;                    // launch date for testing.
+    transferlcks transfer_lock_table(_self, _self); // code: _self, scope: _self
     auto accidx = transfer_lock_table.get_index<N(acc)>();
     // auto itr = accidx.find(to); // iterator to the specified account.
     auto itr = accidx.lower_bound(to);
+
+    uint64_t tbl_size = 0;
+    // using primitive loop to get the size of the table
+    // TODO: replace it with a suitable container function.
+    for (auto size : transfer_lock_table)
+    {
+        ++tbl_size;
+    }
 
     int count = 0;
     for (; itr != accidx.end() && itr->account == to; ++itr) // visiting all such accounts.
@@ -129,7 +137,9 @@ void token::launchlock(account_name to, asset quantity)
         // lock date check
         if (itr->locked_until == launch_date)
         {
-            // modify the accounts locked_untill
+            accidx.modify(itr, _self, [&](auto &tfl) {
+                tfl.locked_balance += quantity;
+            });
             count++;
             break;
         }
@@ -137,6 +147,13 @@ void token::launchlock(account_name to, asset quantity)
     if (!count)
     {
         // create such entry in transferlcks
+        transfer_lock_table.emplace(_self, [&](auto &tfl) {
+            tfl.id = ++tbl_size;
+            tfl.account = to;
+            tfl.locked_balance.amount = 0.0000;
+            tfl.locked_balance.symbol = quantity.symbol;
+            tfl.locked_until = launch_date;
+        });
     }
 }
 

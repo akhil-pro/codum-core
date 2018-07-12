@@ -26,7 +26,7 @@
           "type": "name"
         },{
           "name": "locked_balance",
-          "type": "uint64"
+          "type": "asset"
         },{
           "name": "locked_until",
           "type": "uint64"
