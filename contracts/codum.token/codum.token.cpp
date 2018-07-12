@@ -80,7 +80,6 @@ void token::transfer(account_name from,
     add_balance(to, quantity, from);
 }
 
-// ==> WIP  how to store datetime?  <== //
 void token::setunlock(uint64_t date, uint8_t percent) // WIP
 {
     require_auth(_self);
@@ -94,7 +93,6 @@ void token::setunlock(uint64_t date, uint8_t percent) // WIP
     });
 }
 
-// ===> WIP launch_lock function <=== //
 void token::launchlock(account_name to, asset quantity)
 {
     // ISSUER PERMISSION CHECK //
@@ -121,10 +119,25 @@ void token::launchlock(account_name to, asset quantity)
     token::launch_lock(to, quantity, launch_date);
 }
 
+void token::gradlock(account_name to, asset quantity)
+{
+    eosio::print("DEBUG-- GRADLOCK WORKS \n");
+    // ISSUER PERMISSION CHECK //
+    auto sym = quantity.symbol; //==> requires quantity, if need be to extract it to a private function...
+    eosio_assert(sym.is_valid(), "invalid symbol name");
+    auto sym_name = sym.name();
+    stats statstable(_self, sym_name);
+    auto existing = statstable.find(sym_name);
+    eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
+    const auto &st = *existing;
+    require_auth(st.issuer);
+    // ISSUER PERMISSION CHECK COMPLETE//
+}
+
+// PRIVATE UTILITY MEM-FUNCT DEFINITIONS
 void token::sub_balance(account_name owner, asset value)
 {
     accounts from_acnts(_self, owner);
-
     const auto &from = from_acnts.get(value.symbol.name(), "no balance object found");
     eosio_assert(from.balance.amount >= value.amount, "overdrawn balance");
 
@@ -160,7 +173,7 @@ void token::add_balance(account_name owner, asset value, account_name ram_payer)
 
 void token::launch_lock(account_name to, asset quantity, uint64_t launch_date)
 {
-    transferlcks transfer_lock_table(_self, _self); // code: _self, scope: _self
+    transferlocks transfer_lock_table(_self, _self); // code: _self, scope: _self
     auto accidx = transfer_lock_table.get_index<N(acc)>();
     // auto itr = accidx.find(to); // iterator to the specified account.
     auto itr = accidx.lower_bound(to);
@@ -180,7 +193,7 @@ void token::launch_lock(account_name to, asset quantity, uint64_t launch_date)
         if (itr->locked_until == launch_date)
         {
             accidx.modify(itr, _self, [&](auto &tfl) {
-                tfl.locked_balance += quantity;
+                tfl.locked_balance += static_cast<uint64_t>(quantity.amount);
             });
             count++;
             break;
@@ -188,12 +201,11 @@ void token::launch_lock(account_name to, asset quantity, uint64_t launch_date)
     }
     if (!count)
     {
-        // create such entry in transferlcks
+        // create such entry in transferlocks
         transfer_lock_table.emplace(_self, [&](auto &tfl) {
             tfl.id = ++tbl_size;
             tfl.account = to;
-            tfl.locked_balance.amount = 0.0000;
-            tfl.locked_balance.symbol = quantity.symbol;
+            tfl.locked_balance = static_cast<uint64_t>(quantity.amount);
             tfl.locked_until = launch_date;
         });
     }
@@ -201,4 +213,4 @@ void token::launch_lock(account_name to, asset quantity, uint64_t launch_date)
 
 } // namespace eosio
 
-EOSIO_ABI(eosio::token, (create)(issue)(transfer)(setunlock)(launchlock))
+EOSIO_ABI(eosio::token, (create)(issue)(transfer)(setunlock)(launchlock)(gradlock))

@@ -78,25 +78,25 @@ private:
 
   typedef eosio::multi_index<N(gradunlocks), gradunlock> gradunlocks;
 
-  /// @abi table transferlcks i64
-  struct transferlck
+  /// @abi table transferlock i64
+  struct transferlock
   {
     uint64_t id;
     account_name account;
-    asset locked_balance;
+    uint64_t locked_balance;
     uint64_t locked_until;
 
     uint64_t primary_key() const { return id; }
 
     account_name get_account() const { return account; }
 
-    EOSLIB_SERIALIZE(transferlck, (id)(account)(locked_balance)(locked_until))
+    EOSLIB_SERIALIZE(transferlock, (id)(account)(locked_balance)(locked_until))
   };
 
-  typedef eosio::multi_index<N(transferlcks), transferlck,
+  typedef eosio::multi_index<N(transferlock), transferlock,
                              indexed_by<N(acc),
-                                        const_mem_fun<transferlck, uint64_t, &transferlck::get_account>>>
-      transferlcks;
+                                        const_mem_fun<transferlock, uint64_t, &transferlock::get_account>>>
+      transferlocks;
 
   // PRIVATE UTILITY FUNCTIONS
   void launch_lock(account_name to, asset quantity, uint64_t launch_date);

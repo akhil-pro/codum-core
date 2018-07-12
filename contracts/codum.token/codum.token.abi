@@ -16,7 +16,7 @@
         }
       ]
     },{
-      "name": "transferlck",
+      "name": "transferlock",
       "base": "",
       "fields": [{
           "name": "id",
@@ -26,13 +26,13 @@
           "type": "name"
         },{
           "name": "locked_balance",
-          "type": "asset"
+          "type": "uint64"
         },{
           "name": "locked_until",
           "type": "uint64"
         }
       ]
-    },{
+    },,{
       "name": "transfer",
       "base": "",
       "fields": [
@@ -92,6 +92,17 @@
           "type": "asset"
         }
       ]
+    },{
+      "name": "gradlock",
+      "base": "",
+      "fields": [{
+          "name": "to",
+          "type": "name"
+        },{
+          "name": "quantity",
+          "type": "asset"
+        }
+      ]
     }
   ],
   "actions": [{
@@ -113,6 +124,10 @@
     },{
       "name": "launchlock",
       "type": "launchlock",
+      "ricardian_contract": ""
+    },{
+      "name": "gradlock",
+      "type": "gradlock",
       "ricardian_contract": ""
     }
   ],
@@ -139,7 +154,7 @@
       ],
       "type": "gradunlock"
     },{
-      "name": "transferlcks",
+      "name": "transferlock",
       "index_type": "i64",
       "key_names": [
         "id"
@@ -147,7 +162,7 @@
       "key_types": [
         "uint64"
       ],
-      "type": "transferlck"
+      "type": "transferlock"
     }
   ],
   "ricardian_clauses": [],
