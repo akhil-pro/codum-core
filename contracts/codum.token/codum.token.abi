@@ -93,7 +93,6 @@
         }
       ]
     }
-
   ],
   "actions": [{
       "name": "transfer",

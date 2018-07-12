@@ -92,9 +92,11 @@ private:
     EOSLIB_SERIALIZE(transferlck, (id)(account)(locked_balance)(locked_until))
   };
 
-  typedef eosio::multi_index<N(transferlcks), transferlck,
-                             indexed_by<N(byacc), const_mem_fun<transferlck, uint64_t, &transferlck::get_account>>>
-  transferlcks();
+   typedef eosio::multi_index<N(transferlcks), transferlck,
+        indexed_by< N(acc),
+            const_mem_fun<transferlck, uint64_t, &transferlck::get_account>
+        >
+    > transferlcks;
   // ============ WIP ==============
 
   void sub_balance(account_name owner, asset value);

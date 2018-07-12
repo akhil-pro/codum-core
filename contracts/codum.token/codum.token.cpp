@@ -115,8 +115,29 @@ void token::launchlock(account_name to, asset quantity)
     eosio_assert(quantity.amount <= st.max_supply.amount - st.supply.amount, "quantity exceeds available supply");
     // QUANTITY CHECK //
 
-    uint64_t launch_date = 1000; // HARDCODING the launch date.
-    transferlcks transfer_lock_table(_self, _self);
+    /*uint64_t launch_date = stactic_cast<uint64_t>(1567987200)//==> epoch time in seconds corressponding to  Monday, 9 September 2019 00:00:00 GMT*/
+
+    uint64_t launch_date = static_cast<uint64_t>(1000); // launch date for testing.
+    transferlcks transfer_lock_table(_self, _self);     // code: _self, scope: _self
+    auto accidx = transfer_lock_table.get_index<N(acc)>();
+    // auto itr = accidx.find(to); // iterator to the specified account.
+    auto itr = accidx.lower_bound(to);
+
+    int count = 0;
+    for (; itr != accidx.end() && itr->account == to; ++itr) // visiting all such accounts.
+    {
+        // lock date check
+        if (itr->locked_until == launch_date)
+        {
+            // modify the accounts locked_untill
+            count++;
+            break;
+        }
+    }
+    if (!count)
+    {
+        // create such entry in transferlcks
+    }
 }
 
 void token::sub_balance(account_name owner, asset value)
