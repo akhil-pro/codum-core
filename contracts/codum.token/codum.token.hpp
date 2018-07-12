@@ -34,13 +34,13 @@ public:
                 string memo);
 
   // @abi action
-  void setunlock(uint64_t date, uint8_t percent); // WIP
+  void setunlock(uint64_t date, uint8_t percent);
 
   // @abi action
-  void launchlock(account_name to, asset quantity); // WIP
+  void launchlock(account_name to, asset quantity);
 
   // @abi action
-  void gradlock(account_name to, asset quantity);
+  void gradlock(account_name to, asset quantity); // WIP
 
   inline asset get_supply(symbol_name sym) const;
   inline asset get_balance(account_name owner, symbol_name sym) const;
@@ -78,8 +78,6 @@ private:
 
   typedef eosio::multi_index<N(gradunlocks), gradunlock> gradunlocks;
 
-  // ============ WIP ==============
-
   /// @abi table transferlcks i64
   struct transferlck
   {
@@ -99,8 +97,9 @@ private:
                              indexed_by<N(acc),
                                         const_mem_fun<transferlck, uint64_t, &transferlck::get_account>>>
       transferlcks;
-  // ============ WIP ==============
 
+  // PRIVATE UTILITY FUNCTIONS
+  void launch_lock(account_name to, asset quantity, uint64_t launch_date);
   void sub_balance(account_name owner, asset value);
   void add_balance(account_name owner, asset value, account_name ram_payer);
 
