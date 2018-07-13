@@ -71,7 +71,7 @@
         {"name":"issuer", "type":"account_name"}
       ]
     },{
-      "name": "setunlock",
+      "name": "setgrunlock",
       "base": "",
       "fields": [{
           "name": "date",
@@ -118,8 +118,8 @@
       "type": "create",
       "ricardian_contract": ""
     },,{
-      "name": "setunlock",
-      "type": "setunlock",
+      "name": "setgrunlock",
+      "type": "setgrunlock",
       "ricardian_contract": ""
     },{
       "name": "launchlock",
@@ -166,5 +166,6 @@
     }
   ],
   "ricardian_clauses": [],
+  "error_messages": [],
   "abi_extensions": []
 }

@@ -80,7 +80,7 @@ void token::transfer(account_name from,
     add_balance(to, quantity, from);
 }
 
-void token::setunlock(uint64_t date, uint8_t percent) // WIP
+void token::setgrunlock(uint64_t date, uint8_t percent) // WIP
 {
     require_auth(_self);
     gradunlocks gradual_unlock_table(_self, _self); // code: _self, scope: _self
@@ -121,6 +121,7 @@ void token::launchlock(account_name to, asset quantity)
 
 void token::gradlock(account_name to, asset quantity)
 {
+    eosio::print("DEBUG-- GRADLOCK WORKS \n");
     // ISSUER PERMISSION CHECK //
     auto sym = quantity.symbol; //==> requires quantity, if need be to extract it to a private function...
     eosio_assert(sym.is_valid(), "invalid symbol name");

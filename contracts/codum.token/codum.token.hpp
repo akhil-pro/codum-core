@@ -34,7 +34,7 @@ public:
                 string memo);
 
   // @abi action
-  void setunlock(uint64_t date, uint8_t percent);
+  void setgrunlock(uint64_t date, uint8_t percent);
 
   // @abi action
   void launchlock(account_name to, asset quantity);
