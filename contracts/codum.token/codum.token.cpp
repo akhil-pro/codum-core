@@ -132,47 +132,10 @@ void token::gradlock(account_name to, asset quantity)
     require_auth(st.issuer);
     // ISSUER PERMISSION CHECK COMPLETE//
 
-    gradunlocks gradual_unlock_table(_self, _self);
-    transferlocks transfer_lock_table(_self, _self);
-    auto accidx = transfer_lock_table.get_index<N(acc)>();
-    int count = 0;
-
-    for (auto &otr : gradual_unlock_table)
-    {
-        auto locked_until_date = otr.locked_until;
-        auto threshold = otr.lock_threshold; // threshold value
-        auto itr = accidx.lower_bound(to);
-
-        for (; itr != accidx.end() && itr->account == to; ++itr) // visiting all accounts = to
-        {
-            {
-                // lock date check
-                if (itr->locked_until == locked_until_date)
-                {
-                    accidx.modify(itr, _self, [&](auto &tfl) {
-                        tfl.locked_balance += (static_cast<uint64_t>(quantity.amount) * static_cast<uint64_t>(threshold) / static_cast<uint64_t>(100));
-                    });
-                    count++;
-                    break;
-                }
-            }
-        }
-        if (!count)
-        {
-            // create such entry in transferlocks
-            auto prim_key = transfer_lock_table.available_primary_key();
-            transfer_lock_table.emplace(_self, [&](auto &tfl) {
-                // address.key = addresses.available_primary_key();
-                tfl.id = prim_key;
-                tfl.account = to;
-                tfl.locked_balance = static_cast<uint64_t>(quantity.amount);
-                tfl.locked_until = locked_until_date;
-            });
-        }
-    }
+    set_gradual_lock(to, quantity);
 }
 
-// PRIVATE UTILITY MEM-FUNCT DEFINITIONS
+// PRIVATE UTILITY MEM-FUNCT'S DEFINITIONS
 void token::sub_balance(account_name owner, asset value)
 {
     accounts from_acnts(_self, owner);
@@ -242,6 +205,47 @@ void token::launch_lock(account_name to, asset quantity, uint64_t launch_date)
     }
 }
 
+void token::set_gradual_lock(account_name to, asset quantity)
+{
+    gradunlocks gradual_unlock_table(_self, _self);
+    transferlocks transfer_lock_table(_self, _self);
+    auto accidx = transfer_lock_table.get_index<N(acc)>();
+    int count = 0;
+
+    for (auto &otr : gradual_unlock_table)
+    {
+        auto locked_until_date = otr.locked_until;
+        auto threshold = otr.lock_threshold; // threshold value
+        auto itr = accidx.lower_bound(to);
+
+        for (; itr != accidx.end() && itr->account == to; ++itr) // visiting all accounts = to
+        {
+            {
+                // lock date check
+                if (itr->locked_until == locked_until_date)
+                {
+                    accidx.modify(itr, _self, [&](auto &tfl) {
+                        tfl.locked_balance += (static_cast<uint64_t>(quantity.amount) * static_cast<uint64_t>(threshold) / static_cast<uint64_t>(100));
+                    });
+                    count++;
+                    break;
+                }
+            }
+        }
+        if (!count)
+        {
+            // create such entry in transferlocks
+            auto prim_key = transfer_lock_table.available_primary_key();
+            transfer_lock_table.emplace(_self, [&](auto &tfl) {
+                // address.key = addresses.available_primary_key();
+                tfl.id = prim_key;
+                tfl.account = to;
+                tfl.locked_balance = static_cast<uint64_t>(quantity.amount);
+                tfl.locked_until = locked_until_date;
+            });
+        }
+    }
+}
 } // namespace eosio
 
 EOSIO_ABI(eosio::token, (create)(issue)(transfer)(setunlock)(launchlock)(gradlock))
