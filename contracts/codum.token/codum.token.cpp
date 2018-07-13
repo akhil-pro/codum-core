@@ -174,17 +174,9 @@ void token::add_balance(account_name owner, asset value, account_name ram_payer)
 void token::launch_lock(account_name to, asset quantity, uint64_t launch_date)
 {
     transferlocks transfer_lock_table(_self, _self); // code: _self, scope: _self
+    auto prim_key = transfer_lock_table.available_primary_key();
     auto accidx = transfer_lock_table.get_index<N(acc)>();
-    // auto itr = accidx.find(to); // iterator to the specified account.
     auto itr = accidx.lower_bound(to);
-
-    uint64_t tbl_size = 0;
-    // using primitive loop to get the size of the table
-    // TODO: replace it with a suitable container function.
-    for (auto size : transfer_lock_table)
-    {
-        ++tbl_size;
-    }
 
     int count = 0;
     for (; itr != accidx.end() && itr->account == to; ++itr) // visiting all such accounts.
@@ -203,7 +195,8 @@ void token::launch_lock(account_name to, asset quantity, uint64_t launch_date)
     {
         // create such entry in transferlocks
         transfer_lock_table.emplace(_self, [&](auto &tfl) {
-            tfl.id = ++tbl_size;
+            // address.key = addresses.available_primary_key();
+            tfl.id = prim_key;
             tfl.account = to;
             tfl.locked_balance = static_cast<uint64_t>(quantity.amount);
             tfl.locked_until = launch_date;
