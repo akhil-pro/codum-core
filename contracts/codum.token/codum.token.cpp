@@ -249,4 +249,4 @@ void token::set_gradual_lock(account_name to, asset quantity)
 }
 } // namespace eosio
 
-EOSIO_ABI(eosio::token, (create)(issue)(transfer)(setunlock)(launchlock)(gradlock))
+EOSIO_ABI(eosio::token, (create)(issue)(transfer)(setgrunlock)(launchlock)(gradlock))
