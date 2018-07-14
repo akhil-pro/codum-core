@@ -95,7 +95,7 @@ void token::setgrunlock(uint64_t date, uint8_t percent) // WIP
 
 void token::launchlock(account_name to, asset quantity)
 {
-    // ISSUER PERMISSION CHECK //
+    // ISSUE PERMISSION CHECK FOR ISSUER //
     auto sym = quantity.symbol;
     eosio_assert(sym.is_valid(), "invalid symbol name");
     auto sym_name = sym.name();
@@ -103,8 +103,8 @@ void token::launchlock(account_name to, asset quantity)
     auto existing = statstable.find(sym_name);
     eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
     const auto &st = *existing;
-    require_auth(st.issuer);
-    // ISSUER PERMISSION CHECK COMPLETE//
+    require_auth2(st.issuer, N(issue));
+    // ISSUE PERMISSION CHECK FOR ISSUER //
 
     // QUANTITY CHECK //
     eosio_assert(quantity.is_valid(), "invalid quantity");
@@ -121,8 +121,7 @@ void token::launchlock(account_name to, asset quantity)
 
 void token::gradlock(account_name to, asset quantity)
 {
-    eosio::print("DEBUG-- GRADLOCK WORKS \n");
-    // ISSUER PERMISSION CHECK //
+    // GRADISSUE PERMISSION CHECK FOR ISSUER //
     auto sym = quantity.symbol; //==> requires quantity, if need be to extract it to a private function...
     eosio_assert(sym.is_valid(), "invalid symbol name");
     auto sym_name = sym.name();
@@ -130,10 +129,31 @@ void token::gradlock(account_name to, asset quantity)
     auto existing = statstable.find(sym_name);
     eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
     const auto &st = *existing;
-    require_auth(st.issuer);
+    require_auth2(st.issuer, N(gradissue)); // issure should have gradissue permission.
+    // GRADISSUE PERMISSION CHECK FOR ISSUER //
+
+    gradual_lock(to, quantity);
+}
+
+void token::distribute(account_name from, account_name to, asset quantity, string memo)
+{
+    eosio::print("DEBUG: DISTOKENS WORKS ");
+    // ISSUER PERMISSION CHECK
+    auto sym = quantity.symbol; //==> requires quantity, if need be to extract it to a private function...
+    eosio_assert(sym.is_valid(), "invalid symbol name");
+    auto sym_name = sym.name();
+    stats statstable(_self, sym_name);
+    auto existing = statstable.find(sym_name);
+    eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
+    const auto &st = *existing;
+    // require_auth(st.issuer);
     // ISSUER PERMISSION CHECK COMPLETE//
 
-    set_gradual_lock(to, quantity);
+    require_auth(st.issuer);
+
+    eosio::print("ASSERTS CAN BE CAUGHT");
+
+    // launch_lock(to, quantity);
 }
 
 // PRIVATE UTILITY MEM-FUNCT'S DEFINITIONS
@@ -206,7 +226,7 @@ void token::launch_lock(account_name to, asset quantity, uint64_t launch_date)
     }
 }
 
-void token::set_gradual_lock(account_name to, asset quantity)
+void token::gradual_lock(account_name to, asset quantity)
 {
     gradunlocks gradual_unlock_table(_self, _self);
     transferlocks transfer_lock_table(_self, _self);
@@ -249,4 +269,4 @@ void token::set_gradual_lock(account_name to, asset quantity)
 }
 } // namespace eosio
 
-EOSIO_ABI(eosio::token, (create)(issue)(transfer)(setgrunlock)(launchlock)(gradlock))
+EOSIO_ABI(eosio::token, (create)(issue)(transfer)(setgrunlock)(launchlock)(gradlock)(distribute))

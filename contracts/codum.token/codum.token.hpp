@@ -42,6 +42,9 @@ public:
   // @abi action
   void gradlock(account_name to, asset quantity);
 
+  // @abi action
+  void distribute(account_name from, account_name to, asset quantity, string memo);
+
   inline asset get_supply(symbol_name sym) const;
   inline asset get_balance(account_name owner, symbol_name sym) const;
 
@@ -100,7 +103,7 @@ private:
 
   // PRIVATE UTILITY FUNCTIONS
   void launch_lock(account_name to, asset quantity, uint64_t launch_date);
-  void set_gradual_lock(account_name to, asset quantity);
+  void gradual_lock(account_name to, asset quantity);
   void sub_balance(account_name owner, asset value);
   void add_balance(account_name owner, asset value, account_name ram_payer);
 
