@@ -149,11 +149,15 @@ void token::distribute(account_name from, account_name to, asset quantity, strin
     // require_auth(st.issuer);
     // ISSUER PERMISSION CHECK COMPLETE//
 
+<<<<<<< HEAD
     require_auth(st.issuer);
 
     eosio::print("ASSERTS CAN BE CAUGHT");
 
     // launch_lock(to, quantity);
+=======
+    set_gradual_lock(to, quantity);
+>>>>>>> 850d2a73218a23b19efbd9edde4af62919f34d22
 }
 
 // PRIVATE UTILITY MEM-FUNCT'S DEFINITIONS
