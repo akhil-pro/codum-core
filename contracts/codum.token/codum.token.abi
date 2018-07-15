@@ -153,6 +153,17 @@
           "type": "string"
         }
       ]
+    },{
+      "name": "updaterate",
+      "base": "",
+      "fields": [{
+          "name": "network",
+          "type": "uint8"
+        },{
+          "name": "rate",
+          "type": "uint64"
+        }
+      ]
     }
   ],
   "actions": [{
@@ -186,6 +197,10 @@
     },{
       "name": "distribcontr",
       "type": "distribcontr",
+      "ricardian_contract": ""
+    },{
+      "name": "updaterate",
+      "type": "updaterate",
       "ricardian_contract": ""
     }
   ],
