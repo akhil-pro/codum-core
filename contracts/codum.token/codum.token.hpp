@@ -43,7 +43,10 @@ public:
   void gradlock(account_name to, asset quantity);
 
   // @abi action
-  void distribute(account_name from, account_name to, asset quantity, string memo);
+  void distribsale(account_name from, account_name to, asset quantity, string memo);
+
+  // @abi action
+  void distribcontr(account_name from, account_name to, asset quantity, string memo);
 
   inline asset get_supply(symbol_name sym) const;
   inline asset get_balance(account_name owner, symbol_name sym) const;

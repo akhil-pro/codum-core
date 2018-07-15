@@ -137,21 +137,25 @@ void token::gradlock(account_name to, asset quantity)
     gradual_lock(to, quantity);
 }
 
-void token::distribute(account_name from, account_name to, asset quantity, string memo)
+void token::distribsale(account_name from, account_name to, asset quantity, string memo)
 {
-    eosio::print("DEBUG: DISTOKENS WORKS ");
-    // ISSUER PERMISSION CHECK
-    auto sym = quantity.symbol; //==> requires quantity, if need be to extract it to a private function...
-    eosio_assert(sym.is_valid(), "invalid symbol name");
-    auto sym_name = sym.name();
-    stats statstable(_self, sym_name);
-    auto existing = statstable.find(sym_name);
-    eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
-    const auto &st = *existing;
-    require_auth(st.issuer);
-    // ISSUER PERMISSION CHECK COMPLETE//
+    // should ideally have a check for issue permission.
+    require_auth2(from, N(active));
 
-    // launch_lock(to, quantity);
+    /*uint64_t launch_date = stactic_cast<uint64_t>(1567987200)//==> epoch time in seconds corressponding to  Monday, 9 September 2019 00:00:00 GMT*/
+    uint64_t launch_date = 1000; // launch date for testing.
+    token::launch_lock(to, quantity, launch_date);
+
+    transfer(from, to, quantity, memo);
+}
+
+void token::distribcontr(account_name from, account_name to, asset quantity, string memo)
+{
+    // should ideally have a check for issue permission.
+    require_auth2(from, N(active));
+
+    token::gradual_lock(to, quantity);
+    transfer(from, to, quantity, memo);
 }
 
 // PRIVATE UTILITY MEM-FUNCT'S DEFINITIONS
@@ -267,4 +271,4 @@ void token::gradual_lock(account_name to, asset quantity)
 }
 } // namespace eosio
 
-EOSIO_ABI(eosio::token, (create)(issue)(transfer)(setgrunlock)(launchlock)(gradlock)(distribute))
+EOSIO_ABI(eosio::token, (create)(issue)(transfer)(setgrunlock)(launchlock)(gradlock)(distribsale)(distribcontr))

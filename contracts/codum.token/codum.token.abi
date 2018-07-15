@@ -104,7 +104,24 @@
         }
       ]
     },{
-      "name": "distribute",
+      "name": "distribsale",
+      "base": "",
+      "fields": [{
+          "name": "from",
+          "type": "name"
+        },{
+          "name": "to",
+          "type": "name"
+        },{
+          "name": "quantity",
+          "type": "asset"
+        },{
+          "name": "memo",
+          "type": "string"
+        }
+      ]
+    },{
+      "name": "distribcontr",
       "base": "",
       "fields": [{
           "name": "from",
@@ -147,8 +164,12 @@
       "type": "gradlock",
       "ricardian_contract": ""
     },{
-      "name": "distribute",
-      "type": "distribute",
+      "name": "distribsale",
+      "type": "distribsale",
+      "ricardian_contract": ""
+    },{
+      "name": "distribcontr",
+      "type": "distribcontr",
       "ricardian_contract": ""
     }
   ],
