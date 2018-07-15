@@ -1,5 +1,8 @@
 #include "codum.token.hpp"
 #include <iostream>
+#include <exception>
+
+using std::exception;
 
 namespace eosio
 {
@@ -86,7 +89,6 @@ void token::setgrunlock(uint64_t date, uint8_t percent) // WIP
     gradunlocks gradual_unlock_table(_self, _self); // code: _self, scope: _self
     auto existing = gradual_unlock_table.find(date);
     eosio_assert(existing == gradual_unlock_table.end(), "This lock date is already set");
-
     gradual_unlock_table.emplace(_self, [&](auto &ut) {
         ut.locked_until = date;
         ut.lock_threshold = percent;
@@ -95,7 +97,7 @@ void token::setgrunlock(uint64_t date, uint8_t percent) // WIP
 
 void token::launchlock(account_name to, asset quantity)
 {
-    // ISSUE PERMISSION CHECK FOR ISSUER //
+    // ACTIVE PERMISSION CHECK FOR ISSUER //
     auto sym = quantity.symbol;
     eosio_assert(sym.is_valid(), "invalid symbol name");
     auto sym_name = sym.name();
@@ -103,8 +105,8 @@ void token::launchlock(account_name to, asset quantity)
     auto existing = statstable.find(sym_name);
     eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
     const auto &st = *existing;
-    require_auth2(st.issuer, N(issue));
-    // ISSUE PERMISSION CHECK FOR ISSUER //
+    require_auth2(st.issuer, N(active));
+    // ACTIVE PERMISSION CHECK FOR ISSUER //
 
     // QUANTITY CHECK //
     eosio_assert(quantity.is_valid(), "invalid quantity");
@@ -121,7 +123,7 @@ void token::launchlock(account_name to, asset quantity)
 
 void token::gradlock(account_name to, asset quantity)
 {
-    // GRADISSUE PERMISSION CHECK FOR ISSUER //
+    // ACTIVE PERMISSION CHECK FOR ISSUER //
     auto sym = quantity.symbol; //==> requires quantity, if need be to extract it to a private function...
     eosio_assert(sym.is_valid(), "invalid symbol name");
     auto sym_name = sym.name();
@@ -129,8 +131,8 @@ void token::gradlock(account_name to, asset quantity)
     auto existing = statstable.find(sym_name);
     eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
     const auto &st = *existing;
-    require_auth2(st.issuer, N(gradissue)); // issure should have gradissue permission.
-    // GRADISSUE PERMISSION CHECK FOR ISSUER //
+    require_auth2(st.issuer, N(active));
+    // ACTIVE PERMISSION CHECK FOR ISSUER //
 
     gradual_lock(to, quantity);
 }
@@ -146,18 +148,10 @@ void token::distribute(account_name from, account_name to, asset quantity, strin
     auto existing = statstable.find(sym_name);
     eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
     const auto &st = *existing;
-    // require_auth(st.issuer);
+    require_auth(st.issuer);
     // ISSUER PERMISSION CHECK COMPLETE//
 
-<<<<<<< HEAD
-    require_auth(st.issuer);
-
-    eosio::print("ASSERTS CAN BE CAUGHT");
-
     // launch_lock(to, quantity);
-=======
-    set_gradual_lock(to, quantity);
->>>>>>> 850d2a73218a23b19efbd9edde4af62919f34d22
 }
 
 // PRIVATE UTILITY MEM-FUNCT'S DEFINITIONS
