@@ -48,6 +48,12 @@ public:
   // @abi action
   void distribcontr(account_name from, account_name to, asset quantity, string memo);
 
+  // @abi action
+  void transfera(account_name from, account_name to, asset quantity, string memo);
+
+  // @abi action
+  void supertransfer(account_name from, account_name to, asset quantity, string memo);
+
   inline asset get_supply(symbol_name sym) const;
   inline asset get_balance(account_name owner, symbol_name sym) const;
 
@@ -109,6 +115,8 @@ private:
   void gradual_lock(account_name to, asset quantity);
   void sub_balance(account_name owner, asset value);
   void add_balance(account_name owner, asset value, account_name ram_payer);
+  void issuer_active_permission_check(asset quantity);
+  void issuer_and_asset_check(asset quantity);
 
 public:
   struct transfer_args

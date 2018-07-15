@@ -97,65 +97,32 @@ void token::setgrunlock(uint64_t date, uint8_t percent) // WIP
 
 void token::launchlock(account_name to, asset quantity)
 {
-    // ACTIVE PERMISSION CHECK FOR ISSUER //
-    auto sym = quantity.symbol;
-    eosio_assert(sym.is_valid(), "invalid symbol name");
-    auto sym_name = sym.name();
-    stats statstable(_self, sym_name);
-    auto existing = statstable.find(sym_name);
-    eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
-    const auto &st = *existing;
-    require_auth2(st.issuer, N(active));
-    // ACTIVE PERMISSION CHECK FOR ISSUER //
-
-    // QUANTITY CHECK //
-    eosio_assert(quantity.is_valid(), "invalid quantity");
-    eosio_assert(quantity.amount > 0, "must issue positive quantity");
-    eosio_assert(quantity.symbol == st.supply.symbol, "symbol precision mismatch");
-    eosio_assert(quantity.amount <= st.max_supply.amount - st.supply.amount, "quantity exceeds available supply");
-    // QUANTITY CHECK //
-
+    token::issuer_and_asset_check(quantity);
     /*uint64_t launch_date = stactic_cast<uint64_t>(1567987200)//==> epoch time in seconds corressponding to  Monday, 9 September 2019 00:00:00 GMT*/
-
     uint64_t launch_date = 1000; // launch date for testing.
     token::launch_lock(to, quantity, launch_date);
 }
 
 void token::gradlock(account_name to, asset quantity)
 {
-    // ACTIVE PERMISSION CHECK FOR ISSUER //
-    auto sym = quantity.symbol; //==> requires quantity, if need be to extract it to a private function...
-    eosio_assert(sym.is_valid(), "invalid symbol name");
-    auto sym_name = sym.name();
-    stats statstable(_self, sym_name);
-    auto existing = statstable.find(sym_name);
-    eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
-    const auto &st = *existing;
-    require_auth2(st.issuer, N(active));
-    // ACTIVE PERMISSION CHECK FOR ISSUER //
-
+    token::issuer_active_permission_check(quantity);
     gradual_lock(to, quantity);
 }
 
 void token::distribsale(account_name from, account_name to, asset quantity, string memo)
 {
-    // should ideally have a check for issue permission.
-    require_auth2(from, N(active));
+    require_auth2(from, N(active)); // from and issuer should be same.
 
-    /*uint64_t launch_date = stactic_cast<uint64_t>(1567987200)//==> epoch time in seconds corressponding to  Monday, 9 September 2019 00:00:00 GMT*/
-    uint64_t launch_date = 1000; // launch date for testing.
-    token::launch_lock(to, quantity, launch_date);
-
-    transfer(from, to, quantity, memo);
+    SEND_INLINE_ACTION(*this, launchlock, {from, N(active)}, {to, quantity});
+    transfer(from, to, quantity, memo); // needs to be inlined
 }
 
 void token::distribcontr(account_name from, account_name to, asset quantity, string memo)
 {
-    // should ideally have a check for issue permission.
-    require_auth2(from, N(active));
+    require_auth2(from, N(active)); // from and issuer should be same.
 
-    token::gradual_lock(to, quantity);
-    transfer(from, to, quantity, memo);
+    SEND_INLINE_ACTION(*this, gradlock, {from, N(active)}, {to, quantity});
+    transfer(from, to, quantity, memo); // needs to be inlined.
 }
 
 // PRIVATE UTILITY MEM-FUNCT'S DEFINITIONS
@@ -268,6 +235,35 @@ void token::gradual_lock(account_name to, asset quantity)
             });
         }
     }
+}
+
+void token::issuer_active_permission_check(asset quantity)
+{
+    auto sym = quantity.symbol;
+    eosio_assert(sym.is_valid(), "invalid symbol name");
+    auto sym_name = sym.name();
+    stats statstable(_self, sym_name);
+    auto existing = statstable.find(sym_name);
+    eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
+    const auto &st = *existing;
+    require_auth2(st.issuer, N(active));
+}
+
+void token::issuer_and_asset_check(asset quantity)
+{
+    auto sym = quantity.symbol;
+    eosio_assert(sym.is_valid(), "invalid symbol name");
+    auto sym_name = sym.name();
+    stats statstable(_self, sym_name);
+    auto existing = statstable.find(sym_name);
+    eosio_assert(existing != statstable.end(), "token with symbol does not exist, create token before issue");
+    const auto &st = *existing;
+    require_auth2(st.issuer, N(active));
+
+    eosio_assert(quantity.is_valid(), "invalid quantity");
+    eosio_assert(quantity.amount > 0, "must issue positive quantity");
+    eosio_assert(quantity.symbol == st.supply.symbol, "symbol precision mismatch");
+    eosio_assert(quantity.amount <= st.max_supply.amount - st.supply.amount, "quantity exceeds available supply");
 }
 } // namespace eosio
 
