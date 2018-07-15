@@ -5,6 +5,11 @@
 
 #include <string>
 
+#define NETWORK_EOS 0
+#define NETWORK_EUR 1
+#define NETWORK_USD 2
+#define NETWORK_ETH 3
+
 namespace eosiosystem
 {
 class system_contract;
@@ -49,10 +54,7 @@ public:
   void distribcontr(account_name from, account_name to, asset quantity, string memo);
 
   // @abi action
-  void transfera(account_name from, account_name to, asset quantity, string memo);
-
-  // @abi action
-  void supertransfer(account_name from, account_name to, asset quantity, string memo);
+  void updaterate(uint8_t network, uint64_t rate);
 
   inline asset get_supply(symbol_name sym) const;
   inline asset get_balance(account_name owner, symbol_name sym) const;
@@ -109,6 +111,20 @@ private:
                              indexed_by<N(acc),
                                         const_mem_fun<transferlock, uint64_t, &transferlock::get_account>>>
       transferlocks;
+
+  /// @abi table exrate i64
+  struct exrate
+  {
+    uint8_t network;
+    uint64_t rate;
+    uint64_t updated;
+
+    uint8_t primary_key() const { return network; }
+
+    EOSLIB_SERIALIZE(exrate, (network)(rate)(updated))
+  };
+
+  typedef eosio::multi_index<N(exrates), exrate> exrates;
 
   // PRIVATE UTILITY FUNCTIONS
   void launch_lock(account_name to, asset quantity, uint64_t launch_date);

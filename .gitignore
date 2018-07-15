@@ -1,5 +1,4 @@
 .idea/*
-*.abi
 *.wasm
 *.wast
 
