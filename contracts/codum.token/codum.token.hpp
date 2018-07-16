@@ -124,7 +124,7 @@ private:
     EOSLIB_SERIALIZE(exrate, (network)(rate)(updated))
   };
 
-  typedef eosio::multi_index<N(exrates), exrate> exrates;
+  typedef eosio::multi_index<N(exrate), exrate> exrates;
 
   // PRIVATE UTILITY FUNCTIONS
   void launch_lock(account_name to, asset quantity, uint64_t launch_date);
